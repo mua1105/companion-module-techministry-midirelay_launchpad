@@ -151,19 +151,55 @@ module.exports = {
 
 							//send the satelite surface key press, if needed
 							if (self.config.useAsSurface) {
-								if (midiObj.midicommand == 'noteon' || midiObj.midicommand == 'noteoff') {
-									if (midiObj.note >= self.config.noteOffset && midiObj.note <= self.config.noteOffset + self.config.maxKeys-1) {
-										let keyState = midiObj.midicommand == 'noteon' ? 'true' : 'false';
-										let keyNumber = midiObj.note - self.config.noteOffset; //ok to not add 1, because it it zero based anyway
-										if (self.config.useAllChannelsAsSurfaces) {
-											//send the key press to the appropriate surface based on the channel
-											self.sendCompanionSatelliteCommand(`KEY-PRESS DEVICEID=${self.DEVICEID}-ch${channel.toString().padStart(2, '0')} KEY=${keyNumber} PRESSED=${keyState}`);
+								//If any of the other Buttons are pressed
+								if (midiObj.midicommand == 'noteon') {
+									console.log('info', "Midi: NoteOn Detected!");
+									if (midiObj.note >= 0 && midiObj.note <= 120) {
+										//Check if pressed or released (yes for some reason they used velocity...)
+										let keyState = midiObj.velocity == '127' ? 'true' : 'false';
+										//Get Key Number
+										let keyNumber = midiObj.note;
+
+										if (self.config.verbose) {
+											console.log('info', "Midi: NoteOn Detected! Key: ",keyNumber, " state: ", keyState );
+											console.log('info', keyNumber);
 										}
-										else {
-											self.sendCompanionSatelliteCommand(`KEY-PRESS DEVICEID=${self.DEVICEID} KEY=${keyNumber} PRESSED=${keyState}`);
+
+										//Calculate the offset for the individual Rows
+										if (keyNumber >= 0 && keyNumber <= 8){
+											keyNumber = keyNumber + 9;
+										}
+										else if (keyNumber >= 16 && keyNumber <= 24){
+											keyNumber = keyNumber + 2;
+										}
+										else if (keyNumber >= 32 && keyNumber <= 40){
+											keyNumber = keyNumber - 5;
+										}
+										else if (keyNumber >= 48 && keyNumber <= 56){
+											keyNumber = keyNumber - 12;
+										}
+										else if (keyNumber >= 64 && keyNumber <= 72){
+											keyNumber = keyNumber - 19;
+										}
+										else if (keyNumber >= 80 && keyNumber <= 88){
+											keyNumber = keyNumber - 26;
+										}
+										else if (keyNumber >= 96 && keyNumber <= 104){
+											keyNumber = keyNumber - 33;
+										}
+										else if (keyNumber >= 112 && keyNumber <= 120){
+											keyNumber = keyNumber - 40;
+										}
+
+										//Send Rescieved midi to SatteliteAPI (to Companion)
+										self.sendCompanionSatelliteCommand(`KEY-PRESS DEVICEID=${self.DEVICEID} KEY=${keyNumber} PRESSED=${keyState}`);
+										
+										if (self.config.verbose) {
+											console.debug('info', `KEY-PRESS DEVICEID=${self.DEVICEID} KEY=${keyNumber} PRESSED=${keyState}`);
 										}
 									}
 								}
+								//self.sendCompanionSatelliteCommand(`KEY-PRESS DEVICEID=${self.DEVICEID} KEY=${keyNumber} PRESSED=${keyState}`);
 							}
 						}
 					}
