@@ -151,9 +151,25 @@ module.exports = {
 
 							//send the satelite surface key press, if needed
 							if (self.config.useAsSurface) {
+								//If the round Buttons at the top are pressed
+								if(midiObj.midicommand == 'cc'){
+									if(self.config.verbose){
+										console.log('ControlChange detected! Key: ', midiObj.controller, "Pressed: ", midiObj.value);
+									}
+
+									//If the right range of Keys is pressed
+									if(midiObj.controller >= 104 && midiObj.controller <= 111){
+										//Check if pressed or released
+										let keyState = midiObj.value == '127' ?  'true' : 'false';
+										//Calcucate the Surface Key Number
+										keyNumber = midiObj.controller - 104;
+										//Send Command
+										self.sendCompanionSatelliteCommand(`KEY-PRESS DEVICEID=${self.DEVICEID} KEY=${keyNumber} PRESSED=${keyState}`);
+									}
+								}
+
 								//If any of the other Buttons are pressed
 								if (midiObj.midicommand == 'noteon') {
-									console.log('info', "Midi: NoteOn Detected!");
 									if (midiObj.note >= 0 && midiObj.note <= 120) {
 										//Check if pressed or released (yes for some reason they used velocity...)
 										let keyState = midiObj.velocity == '127' ? 'true' : 'false';
@@ -162,7 +178,6 @@ module.exports = {
 
 										if (self.config.verbose) {
 											console.log('info', "Midi: NoteOn Detected! Key: ",keyNumber, " state: ", keyState );
-											console.log('info', keyNumber);
 										}
 
 										//Calculate the offset for the individual Rows
