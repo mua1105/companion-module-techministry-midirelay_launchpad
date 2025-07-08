@@ -63,14 +63,20 @@ module.exports = {
 		clearInterval(self.COMPANION_PING_INTERVAL);
 	},
 
-	processCompanionData(data) {
-		let self = this;
+	delay(ms) {
+  		return new Promise(resolve => setTimeout(resolve, ms));
+	},
 
+	async processCompanionData(data) {
+		let self = this;
 		try {
 			let str_raw = String(data).trim();
 			let str_split = str_raw.split('\n');
-	
+			//console.log('lenghth: ', str_split.length)
 			for (let index = 0; index < str_split.length; index++) {
+				
+				//await this.delay(1000);
+
 				let str = str_split[index];
 	
 				let params = str.split(' ');
