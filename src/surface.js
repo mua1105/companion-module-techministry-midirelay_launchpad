@@ -1,4 +1,5 @@
-const { TCPHelper } = require('@companion-module/base')
+const { TCPHelper } = require('@companion-module/base');
+const config = require('./config');
 
 module.exports = {
 	initSurface() {
@@ -84,7 +85,7 @@ module.exports = {
 						}
 					}
 					else {
-						self.sendCompanionSatelliteCommand(`ADD-DEVICE DEVICEID=${self.DEVICEID} PRODUCT_NAME="${productName}" KEYS_PER_ROW=9 KEYS_TOTAL=81 BITMAPS=false COLORS=rgb TEXT=false`);
+						self.sendCompanionSatelliteCommand(`ADD-DEVICE DEVICEID=${self.DEVICEID} PRODUCT_NAME="${productName}" KEYS_PER_ROW=9 KEYS_TOTAL=81 BITMAPS=false COLORS=rgb TEXT=false BRIGHTNESS=true`);
 					}
 					continue;
 				}
@@ -203,6 +204,18 @@ module.exports = {
 						self.log('error', 'Error reading Key Feedback: ' + params[2]);
 					}
 					continue;
+				}
+				if (command == 'BRIGHTNESS'){
+					
+					let resc_dev_id_dirty = params[1].split('=');
+					let resc_dev_id = resc_dev_id_dirty[1];
+					if(resc_dev_id == '"' + self.DEVICEID + '"'){
+						if(self.config.verbose){
+							console.log("Brightness recieved!");
+						}
+						
+					}
+					
 				}
 
 
