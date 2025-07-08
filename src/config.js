@@ -149,6 +149,15 @@ module.exports = {
 				isVisible: (config) => config.useAsSurface == true,
 			},
 			{
+				type: 'dropdown',
+				id: 'midi_output_port',
+				label: 'Feedback to Device/Output Port (which MIDI port to send to)',
+				width: 6,
+				default: this.MIDI_outputs_list[0].id,
+				choices: this.MIDI_outputs_list,
+				isVisible: (config) => config.useMidiFeedback == true
+			},
+			{
 				type: 'static-text',
 				id: 'info3',
 				width: 12,

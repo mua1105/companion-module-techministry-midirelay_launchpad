@@ -100,6 +100,113 @@ module.exports = {
 					}
 					continue;
 				}
+
+				// Key Changed
+				if (command == 'KEY-STATE') {
+					console.log(str);
+					let keyStateCommand = params[5].split('=')
+					let keyNum = Number(keyStateCommand[1]);
+					if (params[2].includes('COLOR')) {
+						//TODO: Supply current key with Color information
+						let colors = params[2].split('"');
+						let rgbcolor = colors[1].split(',');
+						let r_dirty = rgbcolor[0].split('(');
+						let r = Math.round(r_dirty[1] / 85);
+						let g = Math.round(rgbcolor[1]/ 85);
+						let b = Math.round(rgbcolor[2]/ 85);
+
+						let decimal_color = (g) * 16 + 12 + (r)
+
+						console.log("RGB: ", r, g, b);
+						console.log("Decimal", decimal_color);
+						
+						console.log(keyNum)
+
+						//Calculate the offset for the individual Rows
+						if (keyNum >= 0 && keyNum <= 7){
+							//These are the round buttons at the top, those are mapped to "ControlChange" messages 104-111
+							keyNum = keyNum + 104;
+							let channel = 1;
+							console.log('CC Num: ', keyNum);
+							midiObj = {
+								midiport: this.config.midi_output_port,
+								midicommand: 'cc',
+								channel: (channel-1), //channels are zero-based in midi-relay
+								controller: keyNum,
+								value: decimal_color
+							};
+
+							this.sendCommand('sendmidi', midiObj);
+						}
+						//Those are the other keys
+						else if(keyNum >= 9){
+							//Row 0
+							if (keyNum >= 9 && keyNum <= 17){
+								keyNum = keyNum - 9;
+							}
+
+							//Row 1
+							else if (keyNum >= 18 && keyNum <= 26){
+								keyNum = keyNum - 2;
+							}
+
+							//Row 2
+							else if (keyNum >= 27 && keyNum <= 35){
+								keyNum = keyNum + 5;
+							}
+
+							//Row 3
+							else if (keyNum >= 36 && keyNum <= 44){
+								keyNum = keyNum + 12;
+							}
+
+							//Row 4
+							else if (keyNum >= 45 && keyNum <= 53){
+								keyNum = keyNum + 19;
+							}
+
+							//Row 5
+							else if (keyNum >= 54 && keyNum <= 62){
+								keyNum = keyNum + 26;
+							}
+
+							//Row 6
+							else if (keyNum >= 63 && keyNum <= 71){
+								keyNum = keyNum + 33;
+							}
+
+							//Row 7
+							else if (keyNum >= 72 && keyNum <= 80){
+								keyNum = keyNum + 40;
+							}
+
+
+							let channel = 1;
+							let note = keyNum;
+
+
+							midiObj = {
+								midiport: this.config.midi_output_port,
+								midicommand: 'noteon',
+								channel: (channel-1), //channels are zero-based in midi-relay
+								note: note,
+								velocity: decimal_color
+							};
+
+							this.sendCommand('sendmidi', midiObj);
+
+						}
+					}
+					
+					else {
+						//probably not ok, throw an error
+						self.log('error', 'Error reading Key Feedback: ' + params[2]);
+					}
+					continue;
+				}
+
+
+
 			}
 		}
 		catch(error) {
